@@ -17,6 +17,7 @@ __date__ = "28 Aug 2023"
 
 import sys
 from main import clustering
+np.set_printoptions(threshold=10000)
 #from main.IOinterface import IOInterface
 
 def main(x,y):
