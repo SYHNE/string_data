@@ -1,4 +1,10 @@
 from main.IOinterface import IOInterface
+from sklearn import cluster, preprocessing  # 機械学習用のライブラリを利用
+import matplotlib.pyplot as plt  # プロット用のライブラリを利用
+import numpy as np  # numpyという行列などを扱うライブラリを利用
+import pandas as pd #pandasというデータ分析ライブラリを利用
+from sklearn.decomposition import PCA
+
 class clustering(IOInterface):
 
     """
@@ -11,15 +17,6 @@ class clustering(IOInterface):
 
     [インスタンスメソッド]
         
-        __init__(player_distribution, face_distribution_type, card_distribution_type, initial_dice_face_type):
-            player_distribution     -   "human"か"computer"の文字列配列
-            face_distribution_type  -   ゲームで使用するフェイスの組成タイプ、詳細はmain.py
-            card_distribution_type  -   ゲームで使用するカードの組成タイプ、詳細はmain.py
-            initial_dice_face_type  -   ゲームで使用する初期ダイスの組成タイプ、詳細はmain.py
-
-        game():
-            ゲームのメイン処理が書かれるメソッド。
-            main.pyでclusteringインスタンスが作成されたあと、このメソッドが呼び出される。
 
         read():
             コマンドを要求するメッセージを表示し、入力コマンドを返すメソッド。
@@ -32,20 +29,11 @@ class clustering(IOInterface):
             無効なコマンド（illegalな操作ではない）を入力したときに呼び出されるメソッド。
             エラーログを表示する。
 
-        choose_first_action(player):
-            1つ目の行動のコマンドの入力を受け付け処理するメソッド。
-
         print_help():
             可能なコマンド一覧を表示するメソッド。
 
-        make_face_distribution(face_distribution_type):
-            フェイスの組成タイプを受け取り、人数を加味して、実際に使用すべきフェイスのidの配列を返すメソッド。
-
-        make_initial_dice_face(player_list, initial_dice_face_type):
-            最初のダイスの組成タイプを受け取り、各プレイヤーに対して最初のダイスを発行するコマンド。
-            Playerの内部のDicesにアクセスしてDiceを追加する。
     """
-    def __init__(self,structure, poly_num,):
+    def __init__(self, structure, poly_num):
         self.structure = structure
         self.poly_num = poly_num
 
@@ -54,4 +42,42 @@ class clustering(IOInterface):
 
     def read(self):
         return input("\n> loading done\n")
-    def 
+    
+    @staticmethod
+    def pca(df):
+        sc = preprocessing.StandardScaler()
+        sc.fit(df)
+        df_norm = sc.transform(df)
+        PCA_set = PCA(n_components=2)
+        PCA_set.fit(df_norm)
+        print("--- explained_variance_ratio_ ---")
+        print(PCA_set.explained_variance_ratio_)
+        print("--- components ---")
+        print(PCA_set.components_)
+        print("--- mean ---")
+        print(PCA_set.mean_)
+        print("--- covariance ---")
+        print(PCA_set.get_covariance())
+        return PCA_set
+
+    @staticmethod
+    def MeanShift(df, width):
+        ms = cluster.MeanShift(bandwidth=width, seeds=df)
+        ms.fit(df)
+        return ms.labels_
+    
+    def two_dim_plot(df, width):
+        data = pca(df)
+        df_2d = pd.DataFrame(data)
+        df_2d.index = df.index
+        df_2d.columns = ['PC1', 'PC2']
+        df_2d.head()
+        labels = MeanShift(data, width)
+        x = np.array([])
+        y = np.array([])
+        for i in range(len(df_2d.values)):
+            x = np.append(x, float(df_2d.values[i][0]))
+            y = np.append(y, float(df_2d.values[i][1]))
+        plt.scatter(x, y, c=labels, s=6)
+        plt.show()
+
