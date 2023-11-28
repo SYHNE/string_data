@@ -20,6 +20,8 @@ class clustering(IOInterface):
 
         read():
             コマンドを要求するメッセージを表示し、入力コマンドを返すメソッド。
+        pca():
+            pdのdataframeに対しpcaして返す。
 
         write(string):
             改行をいれたあと、stirngを出力するメソッド。
